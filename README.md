@@ -1,7 +1,5 @@
 Welcome to Supply Chain TrueSource Demo :
 
-Done by Gajapathy, Shankaranarayanan and Hari Santhosh for CodeGladiators Bosch Blockchain challenge
-
 Our Demo comprises of three parts:
 
 #IoT Part
