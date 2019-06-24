@@ -30,7 +30,7 @@ const dashboardRoutes = [
   },
   {
     path: "/table",
-    name: "Blockchain Network",
+    name: "ERP FischerTechnik",
     rtlName: "قائمة الجدول",
     icon: "content_paste",
     component: TableList,
@@ -62,7 +62,7 @@ const dashboardRoutes = [
   // },
   {
     path: "/notifications",
-    name: "Notifications",
+    name: "ERP",
     rtlName: "إخطارات",
     icon: Notifications,
     component: NotificationsPage,

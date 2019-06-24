@@ -3,10 +3,16 @@ pragma solidity >=0.4.21 <0.6.0;
 contract HelloHari {
     //uint constant COAP_JOB = 2;
     string temp = "0";
-
+    string ownerName = "Bosch";
     function setTemp(string memory newTemp) public {
 
        temp = newTemp;
+
+   }
+
+   function setOwnerName(string memory newOwnerName) public {
+
+       ownerName = newOwnerName;
 
    }
 
@@ -15,6 +21,12 @@ contract HelloHari {
    function getTemp() public view returns (string memory) {
 
        return temp;
+
+   }
+
+   function getOwner() public view returns (string memory) {
+
+       return ownerName;
 
    }
 

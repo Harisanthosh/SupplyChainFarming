@@ -53,8 +53,8 @@ function findTemp(tempVal) {
 }
 function getTemp(cb) {
     console.log("Sending coap request !");
-    const resp = coap.request('coap://192.168.99.100:5904');
-    //const resp = coap.request('coap://localhost:5683');
+    //const resp = coap.request('coap://192.168.99.100:5904');
+    const resp = coap.request('coap://localhost:5683');
     var currentTemp = "";
     resp.on('response', function (res) {
         res.pipe(process.stdout);

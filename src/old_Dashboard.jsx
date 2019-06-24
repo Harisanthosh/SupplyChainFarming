@@ -36,8 +36,11 @@ import Snackbar from "components/Snackbar/Snackbar.jsx";
 import { HelloHari } from '../../Ethereum';
 import { bugs, website, server } from "variables/general.jsx";
 
-//core components
-import SnackbarContent from "components/Snackbar/SnackbarContent.jsx";
+import {
+  dailySalesChart,
+  emailsSubscriptionChart,
+  completedTasksChart
+} from "variables/charts.jsx";
 
 import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle.jsx";
 
@@ -45,7 +48,6 @@ class Dashboard extends React.Component {
 
   constructor(props) {
     super(props);
-    window.count = 0;
     this.state = {
       tempNew: 0,
       tempNew1: 0,
@@ -53,41 +55,20 @@ class Dashboard extends React.Component {
       tempNew3: 0,
       value: 0,
       bValue: '',
-      pState: {},
-      pState1: {},
-      pState2: {
-        tempNew: 0,
-        tempNew1: 0,
-        tempNew2: 0,
-        tempNew3: 0,
-        value: 0,
-        bValue: '',
-        currentOwner: 'Food Producer',
-        currentFleet: 'fleet2',
-        status: 'On Transit',
-        urlT: 'http://localhost:3809/esp2',
-        cInt: function () { },
-        enableTemp: false,
-        triggerAlarm: false
-      },
       currentOwner: 'Food Producer',
-      currentFleet: 'fleet1',
       status: 'On Transit',
-      urlT: 'http://localhost:3809/',
       cInt: function () { },
-      enableTemp: false,
-      triggerAlarm: false
+      enableTemp: false
     };
     this.getTempFromServer = this.getTempFromServer.bind(this);
     this.setTempFromServer = this.setTempFromServer.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.executeToChain = this.executeToChain.bind(this);
     this.transferOwnership = this.transferOwnership.bind(this);
-    this.handleFleetChange = this.handleFleetChange.bind(this);
   }
   async getTempFromServer() {
     console.log("Button click worked");
-    fetch(this.state.urlT,
+    fetch('http://localhost:3809/esp1',
       {
         //mode: 'no-cors',
         method: 'GET'
@@ -97,18 +78,18 @@ class Dashboard extends React.Component {
       this.setState({ tempNew: myJson.Temp });
       //console.log(JSON.stringify(myJson));
     });
-    // fetch('http://localhost:3809/Rpi',
-    //   {
-    //     //mode: 'no-cors',
-    //     method: 'GET'
-    //   }
-    // ).then(resp => resp.json()).then(myJson => {
-    //   console.log("Resolved!!");
-    //   this.setState({ tempNew1: myJson.Temp });
-    //   //console.log(JSON.stringify(myJson));
-    // }).catch(function (error) {
-    //   console.log(error);
-    // });
+    fetch('http://localhost:3809/Rpi',
+      {
+        //mode: 'no-cors',
+        method: 'GET'
+      }
+    ).then(resp => resp.json()).then(myJson => {
+      console.log("Resolved!!");
+      this.setState({ tempNew1: myJson.Temp });
+      //console.log(JSON.stringify(myJson));
+    }).catch(function (error) {
+      console.log(error);
+    });
 
   }
   handleChange(event) {
@@ -116,42 +97,9 @@ class Dashboard extends React.Component {
     console.log(this.state.value);
   }
 
-  handleFleetChange(event) {
-    var handl = this;
-    //this.setState({ currentFleet: event.target.value });
-    if (event.target.value === 'fleet2') {
-      //this.setState({ urlT: 'http://localhost:3809/esp2' });
-      this.setState({ pState: this.state });
-      if (this.state.pState2.currentOwner === 'Food Producer' && window.count == 0) {
-        window.count += 1;
-        this.setState(this.state.pState2);
-      }
-      else {
-        this.setState(window.fleet2Str);
-      }
-    }
-    else {
-      window.fleet2Str = this.state;
-      this.setState({
-        pState2: {
-          currentOwner: handl.state.currentOwner
-        }
-      });
-      // this.setState({
-      //   pState1: this.state
-      // });
-      this.setState(this.state.pState);
-      //this.setState({ currentFleet: event.target.value, urlT: 'http://localhost:3809/esp1' });
-    }
-  }
-
   async executeToChain(parVal) {
-
     const handl = this;
-    if (parVal < 24) {
-      this.setState({ triggerAlarm: false });
-    }
-    HelloHari.methods.setTemp(parVal).send({ from: "0x63692a3BEAB935cB5fA3f5636047E3B0470Ed115", gas: "220000" }, (error, transactionHash) => {
+    HelloHari.methods.setTemp(parVal.toString()).send({ from: "0x10830ddfa1e78FfC198987AaA873293a8Ce61dD5", gas: "220000" }, (error, transactionHash) => {
       if (error) console.log(error);
       else {
         console.log(transactionHash);
@@ -180,7 +128,7 @@ class Dashboard extends React.Component {
     this.setState({ value: newVal });
     this.state.cInt = setInterval(function () {
       console.log("Executing every 2 secs");
-      fetch(handl.state.urlT,
+      fetch('http://localhost:3809/esp1',
         {
           //mode: 'no-cors',
           method: 'GET'
@@ -189,9 +137,7 @@ class Dashboard extends React.Component {
         console.log("Resolved!!");
         console.log(myJson);
         console.log(myJson.Temp);
-        if (handl.state.value == 0) {
-          handl.setState({ tempNew: myJson.Temp, currentOwner: 'Food Producer' });
-        } else if (handl.state.value == 1) {
+        if (handl.state.value == 1) {
           handl.setState({ tempNew1: myJson.Temp, currentOwner: 'Food Processor' });
         } else if (handl.state.value == 2) {
           handl.setState({ tempNew2: myJson.Temp, currentOwner: 'Distributor' });
@@ -212,30 +158,8 @@ class Dashboard extends React.Component {
   }
   componentWillMount() {
     const handl = this;
-    // var event = HelloHari.events.TempAlarm();
-
-    // event.watch(function (error, result) {
-    //   // result contains non-indexed arguments and topics
-    //   // given to the `Deposit` call.
-    //   if (!error)
-    //     console.log(result);
-    // });
-
-    HelloHari.events.TempAlarm({
-      //filter: { myIndexedParam: [20, 23], myOtherIndexedParam: '0x123456789...' }, // Using an array means OR: e.g. 20 or 23
-      fromBlock: 0
-    }, (error, event) => { this.setState({ triggerAlarm: true }); console.log(event); })
-      .on('data', (event) => {
-        console.log("Event Value is " + event); // same results as the optional callback above
-      })
-      .on('changed', (event) => {
-        // remove event from local database
-        console.log(event);
-      })
-      .on('error', console.error);
-
     //fetch('http://localhost:3809/',
-    fetch(this.state.urlT,
+    fetch('http://localhost:3809/esp1',
       {
         //mode: 'no-cors',
         method: 'GET'
@@ -255,7 +179,7 @@ class Dashboard extends React.Component {
 
     this.state.cInt = setInterval(function () {
       console.log("Executing every 2 secs");
-      fetch(handl.state.urlT,
+      fetch('http://localhost:3809/esp1',
         {
           //mode: 'no-cors',
           method: 'GET'
@@ -275,25 +199,10 @@ class Dashboard extends React.Component {
     const { classes } = this.props;
     return (
       <div>
-        <h3>
-          Select your fleet to track the Status:
-          <select value={this.state.currentFleet} onChange={this.handleFleetChange} style={{ width: '150px', height: '30px' }}>
-            <option value="fleet1">Fleet1</option>
-            <option value="fleet2">Fleet2</option>
-          </select>
-        </h3>
-        <h4 className={classes.cardTitle}>Status - {this.state.status} for {this.state.currentFleet}</h4>
+        <p className={classes.cardCategory}>Status - {this.state.status}</p>
         <h3 className={classes.cardTitle}>
           Current Owner - {this.state.currentOwner}
         </h3>
-        {this.state.triggerAlarm ? <div>
-          <SnackbarContent
-            message={"The contract temperature limit (24 Degree) is breached, hence the money settlement will not be processed!."}
-            close
-            color="danger"
-            icon={AddAlert}
-          />
-        </div> : null}
         <GridContainer>
           <GridItem xs={12} sm={6} md={3}>
             <Card>
@@ -432,8 +341,7 @@ class Dashboard extends React.Component {
             />
           </GridItem>
           <GridItem xs={12} sm={12} md={12}>
-
-            {this.state.currentFleet === "fleet1" ? <Card>
+            <Card>
               <CardHeader color="primary">
                 <h4 className={classes.cardTitleWhite}>Items in Transit</h4>
                 <p className={classes.cardCategoryWhite}>
@@ -454,8 +362,7 @@ class Dashboard extends React.Component {
                   ]}
                 />
               </CardBody>
-            </Card> : null}
-
+            </Card>
           </GridItem>
         </GridContainer>
         {/* <GridContainer>
